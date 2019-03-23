@@ -1,0 +1,11 @@
+language: python
+install: python setup.py install
+script: python tests
+deploy:
+  provider: pypi
+  user: internetimagery
+  password:
+    secure: BCD/mzJQFaWyEstukQBWTpFheY5XNKl3IbHjZc0Ws18Zue2NtxT3HPd3IMVSl7H+/r/3wBNXBiGMQY8V4bTNtMcy3OdogCAmQllcurJblho3oR58VnopHMieaAGspW1LyaN0AupKcgo4k9dnAdd8IWpNWSdX63867Q2+Hp5ZLNAvWROBATIoYsIgtZ+lDAHbd8Srf6nsFsuSaT2TpEXS4E9GQ5HgVuUiRe2V4pJrqmSYI+q5hPAz5ptMDz4muPv3r/7GK0Xg7QGfzWMhyE5RlkD5NQ4DRdU2AsvbaOyQdHxD9cowjVku8AfGtNoh9bbJ5pjrAdp7LPf3iGxNjeMQ7HyB0DgAZ7eOPbObSTFy9wHHje51BlhryuWKkuC1UN9kQKOD73/0qVYs37EItfLaf684oFsBP4IkFefM/ZHNd3BNuqi3f1QuL6HiG+70NsC+TJ7NrYLjS9+d+hKQrWOWPhxh5D1zoEtpwYSXqribiGwmeXi7Z670l/KamE/LgoapJgfUBqB2d4Jq2bMlQulZTB6Po6UPnJDG/DNLQKi0RcY9TwyEcQm68nmMhKk2pQJXydVCYdswKvSJDbl3NstGvrBHt/ketrwVl8WXfE36eB/97BqXf8CJTDvo7gIf4En0fg3dcif5uEQlC1425nv0LP3Qn+TRfSA3QmZdVZV7Y5w=
+  on:
+    tags: true
+  distributions: sdist bdist_wheel
