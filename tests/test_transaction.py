@@ -55,71 +55,85 @@ class TestTransactionRuntime(unittest.TestCase):
         self.assertEqual(counter["revert"], 0)
 
     def test_rollback(self):
-        try:
+        with self.assertRaises(RuntimeError):
             with Transaction() as action:
                 action.test.success()
                 action.test.success()
                 action.test.success()
                 raise RuntimeError()
-        except RuntimeError:
-            pass
 
         self.assertEqual(counter["execute"], 3)
         self.assertEqual(counter["commit"], 0)
         self.assertEqual(counter["revert"], 3)
 
     def test_fail_init(self):
-        try:
+        with self.assertRaises(RuntimeError):
             with Transaction() as action:
                 action.test.success()
                 action.test.init()
                 action.test.success()
-        except RuntimeError:
-            pass
 
         self.assertEqual(counter["execute"], 1)
         self.assertEqual(counter["commit"], 0)
         self.assertEqual(counter["revert"], 1)
 
     def test_fail_execute(self):
-        try:
+        with self.assertRaises(RuntimeError):
             with Transaction() as action:
                 action.test.success()
                 action.test.execute()
                 action.test.success()
-        except RuntimeError:
-            pass
 
         self.assertEqual(counter["execute"], 2)
         self.assertEqual(counter["commit"], 0)
         self.assertEqual(counter["revert"], 2)
 
     def test_fail_commit(self):
-        try:
+        with self.assertRaises(RuntimeError):
             with Transaction() as action:
                 action.test.success()
                 action.test.commit()
                 action.test.success()
-        except RuntimeError:
-            pass
 
         self.assertEqual(counter["execute"], 3)
         self.assertEqual(counter["commit"], 2)
         self.assertEqual(counter["revert"], 1)
 
     def test_fail_revert(self):
-        try:
+        with self.assertRaises(RuntimeError):
             with Transaction() as action:
                 action.test.success()
                 action.test.revert()
                 action.test.success()
                 raise RuntimeError()
-        except RuntimeError:
-            pass
 
         self.assertEqual(counter["execute"], 3)
         self.assertEqual(counter["commit"], 0)
         self.assertEqual(counter["revert"], 3)
+
+class TestTransactionMisc(unittest.TestCase):
+
+    def test_bad_assign(self):
+        with self.assertRaises(TypeError):
+            Transaction.doesnt = "work"
+
+    def test_shallow_assign(self):
+        Transaction.shallow = Success
+        with Transaction() as action:
+            action.shallow()
+
+    def test_deep_assign(self):
+        Transaction.this.very.deep.so.deep.my.gosh = Success
+        with Transaction() as action:
+            action.this.very.deep.so.deep.my.gosh()
+
+    def test_out_of_scope(self):
+        with self.assertRaises(RuntimeError):
+            Transaction().test.success()
+        with self.assertRaises(RuntimeError):
+            with Transaction() as action:
+                action.test.success()
+            action.test.success()
 
 
 if __name__ == '__main__':
