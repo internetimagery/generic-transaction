@@ -8,11 +8,16 @@ eg
 ``` python
 import generic_transaction.actions.IO # Initialize IO actions
 from generic_transaction import Transaction
+
 with Transaction() as action: # Perform actions and logic in a scope
     action.IO.dir.create(dirpath)
     # Some logic ...
     action.IO.file.create(filepath, somedata)
+
+
 # or ...
+
+
 action = Transaction()
 action.start() # Perhaps we zip off to some thread somewhere?...
 try:
