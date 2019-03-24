@@ -5,7 +5,7 @@ except ImportError:
 import os.path
 
 setup(
-    version = "0.0.0",
+    version = "0.1.0",
     name = "generic-transaction",
     author = "Jason Dixon",
     packages = ["generic_transaction"],
