@@ -4,6 +4,7 @@ import shutil
 
 from clean_transaction import Action, Transaction
 
+
 class FileCreateAction(Action):
     """ Create a file and write data """
 
@@ -21,6 +22,7 @@ class FileCreateAction(Action):
     def revert(self):
         if self.path:
             os.remove(self.path)
+
 
 class DirCreateAction(Action):
     """ Create a directory """

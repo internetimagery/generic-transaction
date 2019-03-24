@@ -8,13 +8,16 @@ from clean_transaction import Transaction
 import clean_transaction.actions.IO
 
 
-class TestIOFile(unittest.TestCase):
+class Tempfile(unittest.TestCase):
 
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
 
     def tearDown(self):
         shutil.rmtree(self.tempdir)
+
+
+class TestIOFile(Tempfile):
 
     def test_file_create(self):
         path = os.path.join(self.tempdir, "file1.txt")
@@ -29,13 +32,8 @@ class TestIOFile(unittest.TestCase):
                 raise RuntimeError()
         self.assertFalse(os.path.isfile(path))
 
-class TestIODir(unittest.TestCase):
 
-    def setUp(self):
-        self.tempdir = tempfile.mkdtemp()
-
-    def tearDown(self):
-        shutil.rmtree(self.tempdir)
+class TestIODir(Tempfile):
 
     def test_file_create(self):
         path = os.path.join(self.tempdir, "dir1")
