@@ -7,7 +7,7 @@ from clean_transaction import Action, Transaction
 counter = defaultdict(int)
 
 class Success(Action):
-    def execute(self, _):
+    def execute(self, _, *_, **__):
         counter["execute"] += 1
     def commit(self):
         counter["commit"] += 1
