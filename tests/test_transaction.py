@@ -33,11 +33,16 @@ class FailCommit(Success):
         super(FailCommit, self).commit()
         raise RuntimeError()
 
+class InitArg(Success):
+    def __init__(self, arg):
+        counter[arg] += 1
+
 Transaction.test.success = Success
 Transaction.test.init = FailInit
 Transaction.test.execute = FailExecute
 Transaction.test.revert = FailRevert
 Transaction.test.commit = FailCommit
+Transaction.test.arg = InitArg
 
 class TestTransactionRuntime(unittest.TestCase):
 
@@ -60,6 +65,13 @@ class TestTransactionRuntime(unittest.TestCase):
         self.assertEqual(counter["execute"], 6)
         self.assertEqual(counter["commit"], 6)
         self.assertEqual(counter["revert"], 0)
+
+    def test_context(self):
+        with Transaction("context") as action:
+            action.test.arg()
+            action.test.arg()
+
+        # self.assertEqual(counter["context"], 2)
 
     def test_rollback(self):
         with self.assertRaises(RuntimeError):

@@ -26,6 +26,9 @@ def metaclass(meta):
 class Action(metaclass(abc.ABCMeta)):
     """ Single "atomic" state change """
 
+    def __init__(self, *args, **kwargs):
+        pass
+
     @abc.abstractmethod
     def execute(self, action):
         """
@@ -51,7 +54,9 @@ class Action(metaclass(abc.ABCMeta)):
         pass
 
 def getter(self, attr):
-    return Transaction(self.__root__ or self, os.path.join(self.__path__, attr))
+    return Transaction(*self.__context__[0], **self.__context__[1]).__chain__(
+        self.__root__ or self, os.path.join(self.__path__, attr))
+
 
 def setter(self, attr, action):
     if attr.startswith("__"):
@@ -63,6 +68,7 @@ def setter(self, attr, action):
     self.__actions__[os.path.join(self.__path__, attr)] = action
 
 class TransactionMeta(type):
+    __context__ = ([],{})
     __path__ = __root__ = ''
     __getattr__, __setattr__ = getter, setter
 
@@ -75,8 +81,13 @@ class Transaction(metaclass(TransactionMeta)):
     __actions__, __scoped__ = {}, False
     __getattr__, __setattr__ = getter, setter
 
-    def __init__(self, root=None, path=''):
+    def __init__(self, *args, **kwargs):
+        self.__context__ = (args, kwargs)
+        self.__root__ = self.__path__ = ""
+
+    def __chain__(self, root, path):
         self.__root__, self.__path__ = root, path
+        return self
 
     def __call__(self, *args, **kwargs):
         if not self.__root__:
@@ -84,7 +95,7 @@ class Transaction(metaclass(TransactionMeta)):
         if not self.__root__.__scoped__:
             raise RuntimeError("Cannot execute actions outside of scope.")
         with self.__root__.__lock__:
-            action = self.__actions__[self.__path__]()
+            action = self.__actions__[self.__path__](*self.__context__[0], **self.__context__[1])
             self.__root__.__queue__.append(action)
         return action.execute(self.__root__, *args, **kwargs)
 
