@@ -32,10 +32,25 @@ class TestIOFile(Tempfile):
                 raise RuntimeError()
         self.assertFalse(os.path.isfile(path))
 
+    def test_file_delete(self):
+        path = os.path.join(self.tempdir, "file1.txt")
+        with open(path, "w") as f: f.write("hi")
+        with Transaction() as action:
+            action.IO.file.delete(path)
+        self.assertFalse(os.path.exists(path))
+
+        path = os.path.join(self.tempdir, "file2.txt")
+        with open(path, "w") as f: f.write("hi")
+        with self.assertRaises(RuntimeError):
+            with Transaction() as action:
+                action.IO.file.delete(path)
+                raise RuntimeError()
+        self.assertTrue(os.path.isfile(path))
+
 
 class TestIODir(Tempfile):
 
-    def test_file_create(self):
+    def test_dir_create(self):
         path = os.path.join(self.tempdir, "dir1")
         with Transaction() as action:
             action.IO.dir.create(path)
@@ -47,6 +62,21 @@ class TestIODir(Tempfile):
                 action.IO.dir.create(path)
                 raise RuntimeError()
         self.assertFalse(os.path.exists(path))
+
+    def test_dir_delete(self):
+        path = os.path.join(self.tempdir, "dir1")
+        os.mkdir(path)
+        with Transaction() as action:
+            action.IO.dir.delete(path)
+        self.assertFalse(os.path.exists(path))
+
+        path = os.path.join(self.tempdir, "dir2")
+        os.mkdir(path)
+        with self.assertRaises(RuntimeError):
+            with Transaction() as action:
+                action.IO.dir.delete(path)
+                raise RuntimeError()
+        self.assertTrue(os.path.isdir(path))
 
 
 if __name__ == '__main__':
