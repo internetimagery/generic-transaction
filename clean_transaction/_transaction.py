@@ -56,6 +56,8 @@ def getter(self, attr):
 def setter(self, attr, action):
     if attr.startswith("__"):
         return super(type(self), self).__setattr__(attr, action)
+    if not self.__path__ and attr in dir(self):
+        raise AttributeError("can't set attribute")
     if not issubclass(action, Action):
         raise TypeError("Only Actions may be registered. Got {}".format(action))
     self.__actions__[os.path.join(self.__path__, attr)] = action
@@ -102,3 +104,11 @@ class Transaction(metaclass(TransactionMeta)):
                         action.revert()
                     except Exception:
                         LOG.error(traceback.format_exc())
+
+    @property
+    def start(self):
+        return self.__enter__
+
+    @property
+    def end(self):
+        return self.__exit__

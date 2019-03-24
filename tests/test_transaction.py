@@ -50,8 +50,15 @@ class TestTransactionRuntime(unittest.TestCase):
             action.test.success()
             action.test.success()
 
-        self.assertEqual(counter["execute"], 3)
-        self.assertEqual(counter["commit"], 3)
+        action = Transaction()
+        action.start()
+        action.test.success()
+        action.test.success()
+        action.test.success()
+        action.end(False)
+
+        self.assertEqual(counter["execute"], 6)
+        self.assertEqual(counter["commit"], 6)
         self.assertEqual(counter["revert"], 0)
 
     def test_rollback(self):
@@ -62,9 +69,16 @@ class TestTransactionRuntime(unittest.TestCase):
                 action.test.success()
                 raise RuntimeError()
 
-        self.assertEqual(counter["execute"], 3)
+        action = Transaction()
+        action.start()
+        action.test.success()
+        action.test.success()
+        action.test.success()
+        action.end(True)
+
+        self.assertEqual(counter["execute"], 6)
         self.assertEqual(counter["commit"], 0)
-        self.assertEqual(counter["revert"], 3)
+        self.assertEqual(counter["revert"], 6)
 
     def test_fail_init(self):
         with self.assertRaises(RuntimeError):
@@ -112,6 +126,13 @@ class TestTransactionRuntime(unittest.TestCase):
         self.assertEqual(counter["revert"], 3)
 
 class TestTransactionMisc(unittest.TestCase):
+
+    def test_reserved_assign(self):
+        with self.assertRaises(AttributeError):
+            Transaction.start = Success
+
+        with self.assertRaises(AttributeError):
+            Transaction.end = Success
 
     def test_bad_assign(self):
         with self.assertRaises(TypeError):
