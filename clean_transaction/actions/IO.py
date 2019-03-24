@@ -24,6 +24,25 @@ class FileCreateAction(Action):
         if self.path:
             os.remove(self.path)
 
+
+class FileMoveAction(Action):
+    """ Move a file and write data """
+
+    def __init__(self):
+        self.source = ""
+
+    def execute(self, action, source, destination):
+        shutil.move(source, destination)
+        self.source, self.destination = source, destination
+
+    def commit(self):
+        pass
+
+    def revert(self):
+        if self.source:
+            shutil.move(self.destination, self.source)
+
+
 class FileDeleteAction(Action):
     """ Delete a file """
 
@@ -74,6 +93,8 @@ class DirDeleteAction(FileDeleteAction):
 
 
 Transaction.IO.file.create = FileCreateAction
+Transaction.IO.file.move = FileMoveAction
 Transaction.IO.file.delete = FileDeleteAction
 Transaction.IO.dir.create = DirCreateAction
+Transaction.IO.dir.move = FileMoveAction
 Transaction.IO.dir.delete = DirDeleteAction
