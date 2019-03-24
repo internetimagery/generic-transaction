@@ -29,6 +29,9 @@ else:
     action.end(False)
 ```
 
+## Actions
+
+Transactions provide the scope. Actions provide the fuctionality. The building blocks.
 Each action is described with an "execute", "revert", and "commit" function.
 
 ``` python
