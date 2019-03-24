@@ -1,2 +1,2 @@
-# clean-transaction
+# generic-transaction
 WIP

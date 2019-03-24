@@ -2,7 +2,7 @@
 import unittest
 from collections import defaultdict
 
-from clean_transaction import Action, Transaction
+from generic_transaction import Action, Transaction
 
 counter = defaultdict(int)
 

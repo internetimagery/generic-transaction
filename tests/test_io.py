@@ -4,8 +4,8 @@ import unittest
 import tempfile
 import os.path
 
-from clean_transaction import Transaction
-import clean_transaction.actions.IO
+from generic_transaction import Transaction
+import generic_transaction.actions.IO
 
 
 class Tempfile(unittest.TestCase):

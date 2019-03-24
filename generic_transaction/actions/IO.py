@@ -3,13 +3,13 @@ import os
 import time
 import shutil
 
-from clean_transaction import Action, Transaction
+from generic_transaction import Action, Transaction
 
 
 class FileCreateAction(Action):
     """ Create a file and write data """
 
-    def __init__(self):
+    def __init__(self, *_, **__):
         self.path = ""
 
     def execute(self, action, path, data, binary=False):
@@ -28,7 +28,7 @@ class FileCreateAction(Action):
 class FileMoveAction(Action):
     """ Move a file and write data """
 
-    def __init__(self):
+    def __init__(self, *_, **__):
         self.source = ""
 
     def execute(self, action, source, destination):
@@ -46,7 +46,7 @@ class FileMoveAction(Action):
 class FileDeleteAction(Action):
     """ Delete a file """
 
-    def __init__(self):
+    def __init__(self, *_, **__):
         self.path = ""
         self.temp = ""
 
@@ -70,7 +70,7 @@ class FileDeleteAction(Action):
 class DirCreateAction(Action):
     """ Create a directory """
 
-    def __init__(self):
+    def __init__(self, *_, **__):
         self.path = ""
 
     def execute(self, action, path):
