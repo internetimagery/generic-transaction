@@ -4,6 +4,8 @@ import logging
 import traceback
 import threading
 
+__all__ = ("Action", "Transaction")
+
 # Spec:
     # An action can contain other actions (provided they use the instance passed into the function)
     # An Error within the scope will cause all actions to revert.
@@ -13,10 +15,16 @@ import threading
 
 LOG = logging.getLogger(__name__)
 
-class Action(object):
-    """ Single "atomic" state change """
+def metaclass(meta):
+    """ Metaclass for python 2 & 3 """
+    try:
+        exec("class Dummy(object, metaclass=meta): pass", locals())
+    except SyntaxError:
+        exec("class Dummy(object): __metaclass__ = meta", locals())
+    return locals()["Dummy"]
 
-    __metaclass__ = abc.ABCMeta
+class Action(metaclass(abc.ABCMeta)):
+    """ Single "atomic" state change """
 
     @abc.abstractmethod
     def execute(self, action):
@@ -42,33 +50,28 @@ class Action(object):
         """
         pass
 
+def getter(self, attr):
+    return Transaction(self.__root__ or self, os.path.join(self.__path__, attr))
 
-# TODO: Rework this metaclass to be compatibile with python3
+def setter(self, attr, action):
+    if attr.startswith("__"):
+        return super(type(self), self).__setattr__(attr, action)
+    if not issubclass(action, Action):
+        raise TypeError("Only Actions may be registered. Got {}".format(action))
+    self.__actions__[os.path.join(self.__path__, attr)] = action
 
-class Transaction(object):
+class TransactionMeta(type):
+    __path__ = __root__ = ''
+    __getattr__, __setattr__ = getter, setter
+
+class Transaction(metaclass(TransactionMeta)):
     """
     Generate a transaction scope. All actions within the scope should finish
     successfully or else will undo themselves, and revert state safely.
     """
 
     __actions__, __scoped__ = {}, False
-
-    class __metaclass__(type):
-
-        __path__ = __root__ = ''
-
-        def __getattr__(self, attr):
-            return Transaction(self.__root__ or self, os.path.join(self.__path__, attr))
-
-        def __setattr__(self, attr, action):
-            if attr.startswith("__"):
-                return super(type(self), self).__setattr__(attr, action)
-            if not issubclass(action, Action):
-                raise TypeError("Only Actions may be registered. Got {}".format(action))
-            self.__actions__[os.path.join(self.__path__, attr)] = action
-
-    __getattr__ = __metaclass__.__getattr__.__func__
-    __setattr__ = __metaclass__.__setattr__.__func__
+    __getattr__, __setattr__ = getter, setter
 
     def __init__(self, root=None, path=''):
         self.__root__, self.__path__ = root, path
@@ -99,31 +102,3 @@ class Transaction(object):
                         action.revert()
                     except Exception:
                         LOG.error(traceback.format_exc())
-
-if __name__ == '__main__':
-
-    # Create a new action.
-    class PrintAction(Action):
-        def execute(self, action, msg):
-            LOG.info("RUNNING", msg)
-        def revert(self):
-            LOG.info("REVERT")
-        def commit(self):
-            LOG.info("COMMIT")
-
-    # Register the action for use, nested any level deep.
-    Transaction.some.category.printer = PrintAction
-
-    # Run actions within a transaction scope.
-    with Transaction() as action:
-        LOG.info("== Successful ==")
-        action.some.category.printer("SUCCESS")
-
-    try:
-        # A failed transaction will cause the actions to revert.
-        with Transaction() as action:
-            LOG.info("=== Failure ====")
-            action.some.category.printer("FAILURE")
-            raise RuntimeError()
-    except RuntimeError:
-        pass
