@@ -40,6 +40,7 @@ class MyAction(Action):
         pass
     def revert(self):
         pass
+# Register the action for usage later
 Transaction.path.to.my.action = MyAction
 ```
 
@@ -51,16 +52,17 @@ the cleanup in revert needs to know what to clean.
 
 ### Commit
 
-This state will be run after all executions in the transaction have completed and there was no error in the scope.
+This will be run after all executions and the entire transaction scope has completed and no errors were raised.
 Use this time to perform any last minute cleanup, or changes to lock things in.
 Perferrably no errors should occur here.
 
 ### Revert
 
-If an error was raised within the scope, in the execute functions or in the commit pass, we will start reverting.
-The expectation here is that you return the state back as it was when you began the execute step above.
+If an error was raised within the transaction scope, in the execute functions or in the commit pass, we will start reverting.
+The expectation is to return the state back as it was when the execute step above began.
 As this is only ever run while another error is being processed, it is a good idea to keep this as simple and error
 free as possible. Errors within this step will be logged, but not raised.
+All reverts on all actions will have a chance to run, regardless of their failings.
 
 ## Nesting
 
@@ -78,8 +80,12 @@ class MyComplexAction(Action):
     ...
 ```
 
-Check out generic_transaction.actions for examples and existing actions.
+For examples and existing actions have a look at
 
-If you wish to contribute more actions or any kind of patch, feel free!
+```
+generic_transaction.actions
+```
+
+If you wish to contribute more actions or any kind of patch/code/feedback, feel free!
 
 Best Wishes!
